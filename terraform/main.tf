@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-2"
+  region = var.region
 }
 resource "aws_security_group" "bashir_sg" {
   name        = "bashir-terraform-sg"
@@ -27,7 +27,7 @@ resource "aws_security_group" "bashir_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.my_ip}/32"]
   }
 
   egress {
@@ -47,15 +47,22 @@ resource "aws_key_pair" "bashir_key" {
 }
 
 resource "aws_instance" "bashir_ec2" {
-  ami           = "ami-0d8bacd515f0c2693"
-  instance_type = "t3.micro"
+  ami                    = "ami-0d8bacd515f0c2693"
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.bashir_sg.id]
-  key_name = aws_key_pair.bashir_key.key_name
+  key_name               = aws_key_pair.bashir_key.key_name
+
+  user_data = <<-EOF
+    #!/bin/bash
+    dnf update -y
+    dnf install -y nginx
+    systemctl enable nginx
+    systemctl start nginx
+  EOF
+
+  user_data_replace_on_change = true
 
   tags = {
     Name = "bashir-terraform-ec2"
   }
-}
-output "instance_public_ip" {
-  value = aws_instance.bashir_ec2.public_ip
 }
