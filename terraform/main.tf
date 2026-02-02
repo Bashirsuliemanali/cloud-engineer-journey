@@ -46,23 +46,12 @@ resource "aws_key_pair" "bashir_key" {
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDTEL22OrkDZY4TR6IJv8CiVxFlo3i39aPEGRtSk65JN bashirsulieman@icloud.com"
 }
 
-resource "aws_instance" "bashir_ec2" {
-  ami                    = "ami-0d8bacd515f0c2693"
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.bashir_sg.id]
-  key_name               = aws_key_pair.bashir_key.key_name
+module "ec2" {
+  source = "./modules/ec2"
 
-  user_data = <<-EOF
-    #!/bin/bash
-    dnf update -y
-    dnf install -y nginx
-    systemctl enable nginx
-    systemctl start nginx
-  EOF
-
-  user_data_replace_on_change = true
-
-  tags = {
-    Name = "bashir-terraform-ec2-${terraform.workspace}"
-  }
+  ami               = "ami-0d8bacd515f0c2693"
+  instance_type     = var.instance_type
+  key_name          = aws_key_pair.bashir_key.key_name
+  security_group_id = aws_security_group.bashir_sg.id
+  name              = "bashir-terraform-ec2-${terraform.workspace}"
 }
