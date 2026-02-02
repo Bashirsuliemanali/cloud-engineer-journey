@@ -11,7 +11,7 @@ provider "aws" {
   region = var.region
 }
 resource "aws_security_group" "bashir_sg" {
-  name        = "bashir-terraform-sg"
+  name        = "bashir-terraform-sg-${terraform.workspace}"
   description = "Allow SSH and HTTP"
 
   ingress {
@@ -42,7 +42,7 @@ resource "aws_security_group" "bashir_sg" {
   }
 }
 resource "aws_key_pair" "bashir_key" {
-  key_name   = "bashir-terraform-key"
+  key_name   = "bashir-terraform-key-${terraform.workspace}"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDTEL22OrkDZY4TR6IJv8CiVxFlo3i39aPEGRtSk65JN bashirsulieman@icloud.com"
 }
 
@@ -63,6 +63,6 @@ resource "aws_instance" "bashir_ec2" {
   user_data_replace_on_change = true
 
   tags = {
-    Name = "bashir-terraform-ec2"
+    Name = "bashir-terraform-ec2-${terraform.workspace}"
   }
 }
