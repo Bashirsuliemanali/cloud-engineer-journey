@@ -14,6 +14,10 @@ resource "aws_instance" "this" {
 
   user_data_replace_on_change = true
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   tags = {
     Name = var.name
   }
