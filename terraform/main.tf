@@ -39,6 +39,7 @@ resource "aws_security_group" "bashir_sg" {
 
   tags = {
     Name = "bashir-terraform-sg"
+    Name = "bashir-${terraform.workspace}-ec2"
   }
 }
 resource "aws_key_pair" "bashir_key" {
