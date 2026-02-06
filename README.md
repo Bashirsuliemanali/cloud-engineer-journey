@@ -25,3 +25,9 @@ The goal is to build real infrastructure using Infrastructure as Code, follow sa
 
 ## Notes
 This repository focuses on hands on learning and documenting progress rather than finished production projects.
+
+### Day 30 – Terraform Consolidation & Confidence
+
+Day 30 was a consolidation and reflection checkpoint. I focused on understanding why Terraform works the way it does, not just how to run commands.
+
+By this point, I’m confident explaining state, remote backends, locking, drift, safe refactoring, and production guardrails. The main takeaway is that Terraform is about managing risk and change safely, not just provisioning infrastructure.
