@@ -2,3 +2,19 @@
 terraform/.terraform/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
+
+# macOS junk 
+.DS_Store
+
+# Terraform
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/.terraform.lock.hcl
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
