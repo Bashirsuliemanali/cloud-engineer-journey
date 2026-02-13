@@ -18,3 +18,7 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Private keys
+*.pem
+*.key
