@@ -24,6 +24,18 @@ This project provisions:
 The infrastructure is designed to be simple, readable, and safe to operate,
 rather than complex or over-engineered.
 
+## IAM & Access Strategy
+
+This project follows a least-privilege mindset:
+
+	•	Human users should not use AdministratorAccess by default.
+	•	CI/CD pipelines must use dedicated machine roles with restricted permissions.
+	•	Production environments should not be directly modifiable by all developers.
+	•	Access keys should never be committed to code and must be rotated if exposed.
+	•	Temporary credentials are preferred over long-lived static keys.
+
+Security is part of infrastructure design, not an afterthought.
+
 ## How to run (dev)
 
 All commands are run from the Terraform directory.
