@@ -166,3 +166,38 @@ resource "aws_autoscaling_group" "web_asg" {
     propagate_at_launch = true
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "tg_unhealthy_hosts" {
+  alarm_name          = "bashir-web-tg-unhealthy-hosts"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "UnHealthyHostCount"
+  namespace           = "AWS/ApplicationELB"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 0
+
+  dimensions = {
+    TargetGroup  = aws_lb_target_group.web_tg.arn_suffix
+    LoadBalancer = aws_lb.web_alb.arn_suffix
+  }
+
+  alarm_description = "Triggers if any target becomes unhealthy in the target group."
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
+  alarm_name          = "bashir-web-alb-5xx"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "HTTPCode_ELB_5XX_Count"
+  namespace           = "AWS/ApplicationELB"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 0
+
+  dimensions = {
+    LoadBalancer = aws_lb.web_alb.arn_suffix
+  }
+
+  alarm_description = "Triggers if the ALB returns 5XX responses."
+}
