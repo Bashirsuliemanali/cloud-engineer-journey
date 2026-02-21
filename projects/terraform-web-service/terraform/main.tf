@@ -54,6 +54,7 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
+/*
 module "ec2" {
   source = "./modules/ec2"
 
@@ -64,6 +65,7 @@ module "ec2" {
   security_group_id = aws_security_group.web_sg.id
   subnet_id         = module.vpc.public_subnet_a_id
 }
+*/
 
 resource "aws_lb_target_group" "web_tg" {
   name     = "bashir-web-tg"
@@ -105,8 +107,62 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+/*
 resource "aws_lb_target_group_attachment" "web_attach" {
   target_group_arn = aws_lb_target_group.web_tg.arn
   target_id        = module.ec2.instance_id
   port             = 80
+}
+*/
+
+resource "aws_launch_template" "web_lt" {
+  name_prefix   = "bashir-web-lt-"
+  image_id      = var.ami
+  instance_type = var.instance_type
+  key_name      = aws_key_pair.this.key_name
+
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  user_data = base64encode(<<EOF
+#!/bin/bash
+dnf update -y
+dnf install -y nginx
+systemctl enable nginx
+systemctl start nginx
+EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "bashir-web-asg"
+    }
+  }
+}
+
+resource "aws_autoscaling_group" "web_asg" {
+  name             = "bashir-web-asg"
+  min_size         = 1
+  desired_capacity = 1
+  max_size         = 2
+  vpc_zone_identifier = [
+    module.vpc.public_subnet_a_id,
+    module.vpc.public_subnet_b_id
+  ]
+
+  launch_template {
+    id      = aws_launch_template.web_lt.id
+    version = "$Latest"
+  }
+
+  target_group_arns = [aws_lb_target_group.web_tg.arn]
+
+  health_check_type         = "ELB"
+  health_check_grace_period = 60
+
+  tag {
+    key                 = "Name"
+    value               = "bashir-web-asg"
+    propagate_at_launch = true
+  }
 }
