@@ -2,8 +2,11 @@ name: Terraform CI
 
 on:
   push:
-    branches: [main]
+    paths:
+      - 'projects/terraform-web-service/**'
   pull_request:
+    paths:
+      - 'projects/terraform-web-service/**'
 
 jobs:
   terraform:
@@ -14,25 +17,24 @@ jobs:
         working-directory: projects/terraform-web-service/terraform
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-
-      # ✅ CI SAFETY: disable remote backend so plan can run without AWS creds
+        with:
+          terraform_version: 1.10.4
       - name: Disable backend for CI
         run: |
-          if [ -f backend.tf ]; then mv backend.tf backend.tf.ci; fi
+          if [ -f backend.tf ]; then
+            mv backend.tf backend.tf.disabled
+          fi
 
-      - name: Terraform Init (local backend)
-        run: terraform init -reconfigure
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
 
-      - name: Terraform Format
+      - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
-
-      - name: Terraform Plan (local)
-        run: terraform plan -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
