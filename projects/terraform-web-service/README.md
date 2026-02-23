@@ -1,51 +1,62 @@
-# Terraform Web Service Project 
+# Terraform Web Service (Production Style AWS Deployment)
+
 ## Overview
 
-This project demonstrates how to deploy and manage a simple web service on AWS
-using Terraform, with a strong focus on safety, structure, and real-world
-engineering practices.
+This project demonstrates a production style AWS infrastructure deployment using Terraform.
 
-The goal is not just to provision infrastructure, but to show how Terraform
-is used responsibly in a team environment using remote state, locking,
-environment separation, and a clear plan/apply workflow.
+It is intentionally structured to reflect real world engineering practices rather than a basic EC2 demo.
 
-## Architecture 
+The infrastructure includes:
+	-	Custom VPC (not default)
+	-	Multi-AZ public subnets
+	-	Internet Gateway + route tables
+	-	Security groups with scoped access
+	-	Application Load Balancer (ALB)
+	-	Target group with health checks
+	-	Auto Scaling Group (ASG)
+	-	Launch template for instance configuration
+	-	Remote Terraform state (S3 + DynamoDB locking)
+	-	CloudWatch alarms for observability
 
-This project provisions:
+This project demonstrates structured, safe infrastructure management with clear separation of concerns.
 
-- An EC2 instance running nginx
-- A security group allowing:
-  - SSH access (restricted to the developer IP in dev)
-  - HTTP access for web traffic
-- Terraform remote state stored in Amazon S3
-- State locking using Amazon DynamoDB
-- A modular Terraform structure with environment-specific variables
+## Architecture Flow
 
-The infrastructure is designed to be simple, readable, and safe to operate,
-rather than complex or over-engineered.
+User - ALB (Listener :80)
+ALB  - Target Group
+Target Group -  Auto Scaling Group
+ASG  - EC2 instances running nginx
+
+Infrastructure is deployed using Terraform with remote state and locking enabled.
 
 ## IAM & Access Strategy
 
-This project follows a least-privilege mindset:
+This project follows a least privilege mindset:
 
-	•	Human users should not use AdministratorAccess by default.
-	•	CI/CD pipelines must use dedicated machine roles with restricted permissions.
-	•	Production environments should not be directly modifiable by all developers.
-	•	Access keys should never be committed to code and must be rotated if exposed.
-	•	Temporary credentials are preferred over long-lived static keys.
+- Human users should not use AdministratorAccess by default.
+- CI/CD pipelines must use dedicated machine roles with restricted permissions.
+- Production environments should not be directly modifiable by all developers.
+- Access keys should never be committed to code and must be rotated if exposed.
+- Temporary credentials are preferred over long lived static keys.
 
 Security is part of infrastructure design, not an afterthought.
+
+## Environments
+Dev: used for controlled testing and validation.
+Prod: structured for stricter configuration and protection (prevent_destroy mindset).
+
+State is separated using unique keys within the same S3 bucket.
 
 ## How to run (dev)
 
 All commands are run from the Terraform directory.
 
 ```bash
-terraform fmt -recursive
 terraform init
+terraform fmt -recursive 
 terraform validate
 terraform plan -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
-terraform apply
+terraform apply -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
 ```
 
 After verification, resources should be destroyed to avoid unnecessary costs:
@@ -54,9 +65,25 @@ After verification, resources should be destroyed to avoid unnecessary costs:
 terraform destroy -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
 ```
 
-## Cost and Clean-up
+## Observability
 
-This project is for learning and demonstration purposes only.
-All infrastructure is destroyed after verification to avoid ongoing AWS costs. 
-This mirrors real world engineering discipline and cost awareness.
-Cost control is treated as part of the engineering responsibility.
+CloudWatch alarms monitor:
+- Unhealthy target count in the target group
+- ALB 5XX errors
+
+This ensures failures are visible instead of discovered by users.
+
+## Lessons Learned
+- Infrastructure safety comes from structure, not speed.
+- Plan must be reviewed before apply.
+- Load balancers require multi AZ design.
+- Observability is essential in production environments.
+- Destroying unused infrastructure prevents cost creep 
+
+## What This Project Demonstrates
+- Terraform modular structure
+- Environment separation
+- Remote state + locking
+- Safe change workflows
+- Load-balanced, scalable web architecture
+- Production mindset
