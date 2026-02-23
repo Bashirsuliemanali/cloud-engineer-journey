@@ -1,12 +1,17 @@
 name: Terraform CI
 
 on:
+  workflow_dispatch:
+
   push:
+    branches: ["main"]
     paths:
-      - 'projects/terraform-web-service/**'
+      - ".github/workflows/**"
+      - "projects/terraform-web-service/**"
+
   pull_request:
     paths:
-      - 'projects/terraform-web-service/**'
+      - "projects/terraform-web-service/**"
 
 jobs:
   terraform:
