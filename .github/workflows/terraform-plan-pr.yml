@@ -13,7 +13,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Projects/terraform-web-service/terraform
+        working-directory: projects/terraform-web-service/terraform
 
     steps:
       - name: Checkout repository
