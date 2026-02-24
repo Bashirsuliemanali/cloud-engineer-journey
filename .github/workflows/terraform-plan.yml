@@ -1,0 +1,45 @@
+name: Terraform Plan (PR)
+
+on:
+  pull_request:
+    paths:
+      - "Projects/terraform-web-service/terraform/**"
+      - ".github/workflows/terraform-plan.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Projects/terraform-web-service/terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # Safe: do not touch real backend/state in CI
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      # Disable backend in CI to avoid remote state interaction
+      - name: Terraform Plan (no refresh)
+        run: |
+          terraform plan \
+            -refresh=false \
+            -var-file=dev.tfvars \
+            -var="my_ip=127.0.0.1/32" \
+            -input=false \
+            -no-color
