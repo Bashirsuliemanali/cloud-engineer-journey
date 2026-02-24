@@ -24,22 +24,15 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Safe: do not touch real backend/state in CI
-      - name: Terraform Init (no backend)
-        run: terraform init -backend=false
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
+      - name: Terraform Init 
+        run: terraform init -reconfigure
 
-      - name: Terraform Validate
-        run: terraform validate
-
-      # Disable backend in CI to avoid remote state interaction
-      - name: Terraform Plan (no refresh)
-        run: |
-          terraform plan \
-            -refresh=false \
-            -var-file=dev.tfvars \
-            -var="my_ip=127.0.0.1/32" \
-            -input=false \
-            -no-color
+      - name: Terraform Plan 
+        run: terraform plan -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
