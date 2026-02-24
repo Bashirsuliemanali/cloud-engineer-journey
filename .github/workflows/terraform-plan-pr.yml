@@ -33,4 +33,4 @@ jobs:
         run: terraform init -reconfigure
 
       - name: Terraform Plan
-        run: terraform plan -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
+        run: terraform plan -lock=false -refresh=false -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
