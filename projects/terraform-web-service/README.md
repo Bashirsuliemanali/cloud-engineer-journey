@@ -88,7 +88,11 @@ This ensures failures are visible instead of discovered by users.
 - Load-balanced, scalable web architecture
 - Production mindset
 
+## CI/CD & Guardrails 
 
- 
- 
- 
+This project uses GitHub Actions for Terraform automation: 
+- Terraform CI (fmt and validate) runs on push/PR
+- Terraform Plan runs or PR (no backend, no locking)
+- Terraform Apply requires manual approval before execution 
+
+This prevents unintended infrastructure changes and mirrors real production workflows.
