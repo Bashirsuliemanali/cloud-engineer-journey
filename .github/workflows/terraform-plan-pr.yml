@@ -28,9 +28,22 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+      
       - name: Terraform Init
         run: terraform init -reconfigure
 
-      - name: Terraform Plan
-        run: terraform plan -lock=false -refresh=false -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
+      - name: Debug paths + tfvars 
+        run: |
+          pwd
+          ls -la 
+          echo "---- dev.tfvars ----"
+          sed -n '1,120p' dev.tfvars  || true
+          echo "---- keys dir ----"
+          ls -la keys || true 
+          echo "---- show public_key_path via console ----"
+          terraform console -var-file=dev.tfvars -var="my_ip=127.0.0.1/32" <<'EOF'
+          var.public_key_path
+          EOF
+
+            - name: Terraform Plan
+              run: terraform plan -lock=false -refresh=false -var-file=dev.tfvars -var="my_ip=127.0.0.1/32" -var="public_key_path=keys/id_ed25519.pub"
