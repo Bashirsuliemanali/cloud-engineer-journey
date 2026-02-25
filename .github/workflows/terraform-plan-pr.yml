@@ -2,10 +2,9 @@ name: Terraform Plan (PR)
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - 'projects/terraform-web-service/**'
+      - "projects/terraform-web-service/**"
 
 jobs:
   terraform-plan:
@@ -21,29 +20,34 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (read-only)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
       
-      - name: Terraform Init
-        run: terraform init -reconfigure
-
-      - name: Debug paths + tfvars 
+      - name: Disable backend for PR plan
         run: |
-          pwd
-          ls -la 
-          echo "---- dev.tfvars ----"
-          sed -n '1,120p' dev.tfvars  || true
-          echo "---- keys dir ----"
-          ls -la keys || true 
-          echo "---- show public_key_path via console ----"
-          terraform console -var-file=dev.tfvars -var="my_ip=127.0.0.1/32" <<'EOF'
-          var.public_key_path
-          EOF
+          if [ -f backend.tf ]; then
+            mv backend.tf backend.tf.disabled
+          fi
 
-            - name: Terraform Plan
-              run: terraform plan -lock=false -refresh=false -var-file=dev.tfvars -var="my_ip=127.0.0.1/32" -var="public_key_path=keys/id_ed25519.pub"
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan 
+        run: |
+          terraform plan \
+            -lock=false \
+            -refresh=false \
+            -var-file=dev.tfvars \
+            -var="my_ip=127.0.0.1/32" \
+            -var="public_key_path=keys/id_ed25519.pub"
