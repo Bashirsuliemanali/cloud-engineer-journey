@@ -120,10 +120,15 @@ resource "aws_lb_target_group_attachment" "web_attach" {
 */
 
 resource "aws_launch_template" "web_lt" {
-  name_prefix   = "bashir-web-lt-"
-  image_id      = var.ami
-  instance_type = var.instance_type
-  key_name      = aws_key_pair.this.key_name
+  name_prefix            = "bashir-web-lt-"
+  image_id               = var.ami
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.this.key_name
+  update_default_version = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
@@ -139,7 +144,7 @@ EOF
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "bashir-web-asg"
+      Name = "bashir-web"
     }
   }
 }
@@ -155,7 +160,8 @@ resource "aws_autoscaling_group" "web_asg" {
   ]
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy       = false
+    create_before_destroy = true
   }
 
   launch_template {
