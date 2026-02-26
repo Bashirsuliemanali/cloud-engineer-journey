@@ -54,13 +54,13 @@ If destruction is truly required:
 Never use terraform state rm for deletion, it only removes state and can orphan infrastructure.
 
 Commands Used 
-
-```bash
+```
 terraform fmt -recursive
 terraform validate
 terraform fmt -recursive
 terraform plan -var-file=dev.tfvars -var="my_ip=127.0.0.1/32"
 ```
+
 Plan showed expected infrastructure creation due to fresh state:
 `Plan: 16 to add, 0 to change, 0 to destroy`
 
