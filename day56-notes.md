@@ -54,7 +54,8 @@ If destruction is truly required:
 Never use terraform state rm for deletion, it only removes state and can orphan infrastructure.
 
 Commands Used 
-```
+
+``` bash
 terraform fmt -recursive
 terraform validate
 terraform fmt -recursive
