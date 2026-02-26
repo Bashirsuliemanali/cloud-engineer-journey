@@ -96,3 +96,24 @@ This project uses GitHub Actions for Terraform automation:
 - Terraform Apply requires manual approval before execution 
 
 This prevents unintended infrastructure changes and mirrors real production workflows.
+
+## Handy Verification Commands (CLI)
+
+```bash
+# Get ALB URL from terraform outputs
+terraform output -raw alb_url
+
+# Quick health check via curl
+curl -I "$(terraform output -raw alb_url)"
+
+# Get Target Group ARN
+aws elbv2 describe-target-groups \
+  --names bashir-web-tg \
+  --region eu-west-2 \
+  --query 'TargetGroups[0].TargetGroupArn' \
+  --output text
+
+# Check target health (replace ARN with the output above)
+aws elbv2 describe-target-health \
+  --target-group-arn "<TARGET_GROUP_ARN>" \
+  --region eu-west-2
