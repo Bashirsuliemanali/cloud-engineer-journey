@@ -94,6 +94,10 @@ resource "aws_lb" "web_alb" {
     module.vpc.public_subnet_b_id
   ]
   security_groups = [aws_security_group.web_sg.id]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_lb_listener" "http" {
@@ -149,6 +153,10 @@ resource "aws_autoscaling_group" "web_asg" {
     module.vpc.public_subnet_a_id,
     module.vpc.public_subnet_b_id
   ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   launch_template {
     id      = aws_launch_template.web_lt.id

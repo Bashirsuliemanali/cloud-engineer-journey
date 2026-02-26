@@ -1,6 +1,10 @@
 resource "aws_vpc" "this" {
   cidr_block = var.vpc_cidr
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   tags = {
     Name = "${var.name}-vpc"
   }
