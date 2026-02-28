@@ -1,119 +1,125 @@
 # Terraform Web Service (Production Style AWS Deployment)
 
 ## Overview
+This project deploys a scalable nginx web service on AWS using Terraform, structured to reflect real world engineering practices.
 
-This project demonstrates a production style AWS infrastructure deployment using Terraform.
+It demonstrates:
+- modular Terraform design
+- remote state and locking (S3 + DynamoDB)
+- safe workflows (plan first, review changes)
+- basic production architecture (VPC + ALB + ASG)
+- observability basics (CloudWatch alarms)
 
-It is intentionally structured to reflect real world engineering practices rather than a basic EC2 demo.
+## Architecture
+**Request flow:**
+Client - **ALB (:80 listener)** = **Target Group (health checks)** - **Auto Scaling Group** - **EC2 (nginx)**
 
-The infrastructure includes:
-	-	Custom VPC (not default)
-	-	Multi-AZ public subnets
-	-	Internet Gateway + route tables
-	-	Security groups with scoped access
-	-	Application Load Balancer (ALB)
-	-	Target group with health checks
-	-	Auto Scaling Group (ASG)
-	-	Launch template for instance configuration
-	-	Remote Terraform state (S3 + DynamoDB locking)
-	-	CloudWatch alarms for observability
+**Provisioned resources high level:**
+- Custom VPC (non-default)
+- 2 public subnets (Multi-AZ)
+- Internet Gateway + public route table + associations
+- Security group (scoped SSH in dev, HTTP for web traffic)
+- Application Load Balancer (ALB) + listener + target group + attachment
+- Launch Template + Auto Scaling Group
+- CloudWatch alarms (ALB 5XX + unhealthy targets)
+- Remote Terraform state (S3) + state locking (DynamoDB)
 
-This project demonstrates structured, safe infrastructure management with clear separation of concerns.
-
-## Architecture Flow
-
-User - ALB (Listener :80)
-ALB  - Target Group
-Target Group -  Auto Scaling Group
-ASG  - EC2 instances running nginx
-
-Infrastructure is deployed using Terraform with remote state and locking enabled.
-
-## IAM & Access Strategy
-
-This project follows a least privilege mindset:
-
-- Human users should not use AdministratorAccess by default.
-- CI/CD pipelines must use dedicated machine roles with restricted permissions.
-- Production environments should not be directly modifiable by all developers.
-- Access keys should never be committed to code and must be rotated if exposed.
-- Temporary credentials are preferred over long lived static keys.
-
-Security is part of infrastructure design, not an afterthought.
+## Repository Structure
+projects/terraform-web-service/
+README.md
+terraform/
+main.tf
+variables.tf
+outputs.tf
+backend.tf
+dev.tfvars
+prod.tfvars
+modules/
+vpc/
+ec2/
+keys/
 
 ## Environments
-Dev: used for controlled testing and validation.
-Prod: structured for stricter configuration and protection (prevent_destroy mindset).
+- **dev**: fast iteration, scoped access (SSH limited to your IP)
+- **prod**: stricter guardrails and intentional changes
 
-State is separated using unique keys within the same S3 bucket.
+State is separated by backend key naming, allowing one bucket to hold multiple envs/projects safely.
 
-## How to run (dev)
-
-All commands are run from the Terraform directory.
+## How to Run (Dev)
+Run all commands from:
+`projects/terraform-web-service/terraform`
 
 ```bash
 terraform init
-terraform fmt -recursive 
+terraform fmt -recursive
 terraform validate
+
 terraform plan -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
 terraform apply -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
 ```
-
-After verification, resources should be destroyed to avoid unnecessary costs:
-
+## Verify 
 ```bash
+terraform output -raw alb_url
+curl -I "$(terraform output -raw alb_url)"
+```
+## Destroy (Cost Dicipline)
+```bash 
 terraform destroy -var-file=dev.tfvars -var="my_ip=$(curl -4 -s ifconfig.me)/32"
 ```
+## Safety and Guardrails 
+Terraform is powerful, so this project follows safety habits:
+-	Always review plan before apply
+-	Watch for replacement actions and unintended destroys
+-	Use remote state + locking to prevent concurrent writes
+-	Treat “break-glass” changes as temporary and reviewed
+
+## CI/CD Workflow (GitHub Actions)
+
+This project includes automated Terraform workflows using GitHub Actions. 
+
+Two workflows are configured:
+
+### 1. Terraform CI (push & PR validation)
+- Runs `terraform fmt -check`
+- Runs `terraform validate`
+- Prevents invalid configuration from merging into main
+- Does not require AWS credentials
+
+Purpose:
+To block syntactically invalid or unsafe Terraform from entering the codebase.
+
+### 2. Terraform Plan on Pull Request
+- Authenticates securely using GitHub Secrets
+- Runs `terraform init`
+- Executes `terraform plan`
+- Shows infrastructure changes before approval
+
+Purpose:
+To surface destructive changes (replacements, deletes) before they are applied.
+
+### Manual Approval for Apply
+Production style changes require manual review before apply.
+
+This mirrors real world engineering workflows where:
+- Plan is reviewed
+- Destructive changes are questioned
+- Applies are intentional
 
 ## Observability
-
 CloudWatch alarms monitor:
-- Unhealthy target count in the target group
 - ALB 5XX errors
+- Unhealthy target count in the target group
 
-This ensures failures are visible instead of discovered by users.
+This ensures failures are visible early instead of discovered by users.
 
-## Lessons Learned
-- Infrastructure safety comes from structure, not speed.
-- Plan must be reviewed before apply.
-- Load balancers require multi AZ design.
-- Observability is essential in production environments.
-- Destroying unused infrastructure prevents cost creep 
+## Common Mistakes and Fixes 
+**ALB error:** “At least two subnets in two different AZs must be specified”
 
-## What This Project Demonstrates
-- Terraform modular structure
-- Environment separation
-- Remote state + locking
-- Safe change workflows
-- Load-balanced, scalable web architecture
-- Production mindset
+Fix: ensure ALB subnets include two public subnets in different AZs.
 
-## CI/CD & Guardrails 
+**Terraform Lock Errors** 
+If a lock is stuck (e.g., previous run crashed), investigate before forcing unlock.
+Do not disable locking in real production workflows.
 
-This project uses GitHub Actions for Terraform automation: 
-- Terraform CI (fmt and validate) runs on push/PR
-- Terraform Plan runs or PR (no backend, no locking)
-- Terraform Apply requires manual approval before execution 
-
-This prevents unintended infrastructure changes and mirrors real production workflows.
-
-## Handy Verification Commands (CLI)
-
-```bash
-# Get ALB URL from terraform outputs
-terraform output -raw alb_url
-
-# Quick health check via curl
-curl -I "$(terraform output -raw alb_url)"
-
-# Get Target Group ARN
-aws elbv2 describe-target-groups \
-  --names bashir-web-tg \
-  --region eu-west-2 \
-  --query 'TargetGroups[0].TargetGroupArn' \
-  --output text
-
-# Check target health (replace ARN with the output above)
-aws elbv2 describe-target-health \
-  --target-group-arn "<TARGET_GROUP_ARN>" \
-  --region eu-west-2
+**file(var.public_key_path)” fails in CI**
+Ensure the key exists in repo at the correct relative path and is referenced consistently in tfvars
