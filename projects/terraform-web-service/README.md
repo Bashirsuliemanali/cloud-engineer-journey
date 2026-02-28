@@ -25,19 +25,19 @@ Client - **ALB (:80 listener)** = **Target Group (health checks)** - **Auto Scal
 - Remote Terraform state (S3) + state locking (DynamoDB)
 
 ## Repository Structure
-projects/terraform-web-service/
-README.md
-terraform/
-main.tf
-variables.tf
-outputs.tf
-backend.tf
-dev.tfvars
-prod.tfvars
-modules/
-vpc/
-ec2/
-keys/
+- projects/terraform-web-service/
+- README.md
+- terraform/
+    - main.tf
+    - variables.tf
+    - outputs.tf
+    - backend.tf
+    - dev.tfvars
+    - prod.tfvars
+    - modules/
+      - vpc/
+      - ec2/
+    - keys/
 
 ## Environments
 - **dev**: fast iteration, scoped access (SSH limited to your IP)
@@ -118,8 +118,8 @@ This ensures failures are visible early instead of discovered by users.
 Fix: ensure ALB subnets include two public subnets in different AZs.
 
 **Terraform Lock Errors** 
-If a lock is stuck (e.g., previous run crashed), investigate before forcing unlock.
+- If a lock is stuck (e.g., previous run crashed), investigate before forcing unlock.
 Do not disable locking in real production workflows.
 
 **file(var.public_key_path)” fails in CI**
-Ensure the key exists in repo at the correct relative path and is referenced consistently in tfvars
+- Ensure the key exists in repo at the correct relative path and is referenced consistently in tfvars
