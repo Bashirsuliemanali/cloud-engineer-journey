@@ -1,0 +1,1 @@
+# Outputs will be added once EKS resources are defined.
