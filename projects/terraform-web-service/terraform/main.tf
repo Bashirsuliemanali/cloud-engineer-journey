@@ -81,7 +81,7 @@ resource "aws_lb_target_group" "web_tg" {
   vpc_id   = module.vpc.vpc_id
 
   health_check {
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30
@@ -157,12 +157,12 @@ resource "aws_launch_template" "web_lt" {
 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
-  user_data = base64encode(<<EOF
+  user_data = base64encode(<<-EOF
 #!/bin/bash
-dnf update -y
 dnf install -y nginx
 systemctl enable nginx
 systemctl start nginx
+echo "healthy" > /usr/share/nginx/html/health
 EOF
   )
 
