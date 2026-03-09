@@ -240,3 +240,20 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
 
   alarm_description = "Triggers if the ALB returns 5XX responses."
 }
+
+resource "aws_cloudwatch_metric_alarm" "alb_high_response_time" {
+  alarm_name          = "bashir-web-alb-high-response-time"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "TargetResponseTime"
+  namespace           = "AWS/ApplicationELB"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 1
+
+  dimensions = {
+    LoadBalancer = aws_lb.web_alb.arn_suffix
+  }
+
+  alarm_description = "Triggers if average target response time is greater than 1 second."
+}

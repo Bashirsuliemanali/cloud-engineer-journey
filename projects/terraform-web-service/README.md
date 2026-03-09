@@ -106,11 +106,19 @@ This mirrors real world engineering workflows where:
 - Applies are intentional
 
 ## Observability
-CloudWatch alarms monitor:
-- ALB 5XX errors
-- Unhealthy target count in the target group
 
-This ensures failures are visible early instead of discovered by users.
+This project includes CloudWatch alarms for three important operational signals:
+
+- **UnHealthyHostCount** – detects when backend targets fail health checks
+- **HTTPCode_ELB_5XX_Count** – detects user-facing ALB errors
+- **TargetResponseTime** – detects performance degradation even when the service is still up
+
+### Troubleshooting flow
+- If targets become unhealthy, check the health check path, nginx status, and cloud-init output
+- If ALB 5XXs increase, check target registration state and recent rollout behaviour
+- If response time increases, inspect instance health and startup/runtime performance
+
+This helps surface failures early instead of waiting for users to report them.
 
 ## Common Mistakes and Fixes 
 **ALB error:** “At least two subnets in two different AZs must be specified”
