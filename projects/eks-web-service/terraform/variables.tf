@@ -33,3 +33,33 @@ variable "max_size" {
   type        = number
   default     = 2
 }
+
+variable "vpc_cidr" {
+  description = "CIDR block for the EKS VPC"
+  type        = string
+  default     = "10.10.0.0/16"
+}
+
+variable "public_subnet_a_cidr" {
+  description = "CIDR block for public subnet A"
+  type        = string
+  default     = "10.10.1.0/24"
+}
+
+variable "public_subnet_b_cidr" {
+  description = "CIDR block for public subnet B"
+  type        = string
+  default     = "10.10.2.0/24"
+}
+
+variable "availability_zone_a" {
+  description = "Availability Zone for public subnet A"
+  type        = string
+  default     = "eu-west-2a"
+}
+
+variable "availability_zone_b" {
+  description = "Availability Zone for public subnet B"
+  type        = string
+  default     = "eu-west-2b"
+}
