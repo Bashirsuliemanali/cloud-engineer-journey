@@ -1,0 +1,7 @@
+Big day today. Got the full EKS cluster live with worker nodes registered and kubectl connected.
+Hit a real debugging scenario — nodes kept failing to join the cluster with NodeCreationFailure. Diagnosed it as a networking issue. Private subnets have no route to the internet so nodes couldn't reach the EKS control plane to register. This is exactly why NAT Gateways exist in production — they give private instances outbound internet access without exposing them directly. Moved nodes to public subnets temporarily to get things working.
+Also learned about tainted resources — when Terraform marks a resource as broken it destroys and recreates it cleanly on the next apply. That's what happened with the node group after the t3.medium free tier failure yesterday.
+Ran aws eks update-kubeconfig to connect kubectl to the cluster. That command pulls the cluster endpoint and credentials and writes them into ~/.kube/config automatically.
+kubectl get nodes returned 2 nodes both Ready — ip-10-0-1-x and ip-10-0-2-x sitting in the public subnets, Kubernetes 1.31.
+kubectl get pods --all-namespaces showed all system pods running clean — aws-node, coredns, kube-proxy. Zero restarts. Healthy cluster.
+Destroyed everything clean after.
