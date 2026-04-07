@@ -1,0 +1,8 @@
+Biggest day of the project so far. Got a live app running on EKS, accessible from a real URL in the browser.
+Started by bringing the infrastructure back up with terraform apply -var-file="dev.tfvars". First attempt at the node group failed again — this time I understood exactly why. Private subnets have no route to the internet so nodes couldn't reach the EKS control plane to register. Moved nodes to public subnets as a temporary fix. In production the proper solution is a NAT Gateway sitting in the public subnet giving private instances outbound internet access without exposing them directly. Learned this the hard way which means it won't leave me.
+Connected kubectl using aws eks update-kubeconfig --region eu-west-2 --name eks-web-service-cluster. That command pulls the cluster endpoint and credentials and writes them into ~/.kube/config automatically.
+Created the kubernetes folder from scratch. Wrote deployment.yaml — 2 replicas of nginx, port 80. Wrote service.yaml — LoadBalancer type, which tells AWS to automatically spin up an ELB and give it a public DNS URL.
+Ran kubectl apply on both files. kubectl get pods showed 2 pods both Running, automatically spread across eu-west-2a and eu-west-2b by the Kubernetes scheduler. High availability without configuring it manually.
+kubectl get pods -o wide showed each pod on a different node, different AZ. That's self healing distributed infrastructure.
+Pasted the LoadBalancer URL in the browser — nginx welcome page loaded. Live app on the internet on a cluster I built from scratch. Alhamdulillah.
+Lesson for next time — delete Kubernetes services before running terraform destroy otherwise the LoadBalancer holds onto the subnets and destroy takes forever.
