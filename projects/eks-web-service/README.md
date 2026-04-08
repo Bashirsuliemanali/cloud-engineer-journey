@@ -30,6 +30,7 @@ EKS Control Plane (AWS Managed)
 
 ## Project Structure
 
+```
 eks-web-service/
 ├── terraform/
 │   ├── main.tf          # VPC, subnets, IGW, route tables
@@ -41,8 +42,9 @@ eks-web-service/
 │   ├── providers.tf     # AWS provider, version constraints
 │   └── dev.tfvars       # Dev environment variable values
 └── kubernetes/
-├── deployment.yaml  # nginx deployment, 2 replicas
-└── service.yaml     # LoadBalancer service, port 80
+    ├── deployment.yaml  # nginx deployment, 2 replicas
+    └── service.yaml     # LoadBalancer service, port 80
+```
 
 ## How to Run
 
