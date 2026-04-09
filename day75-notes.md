@@ -1,0 +1,7 @@
+Started Project 3 today — CI/CD pipeline with GitHub Actions, Docker, ECR and automated deployment to EKS.
+First understood the concept before touching any code. The pipeline is a conveyor belt — push code to GitHub, Actions triggers automatically, builds a Docker image, pushes it to ECR, deploys to EKS. Zero manual steps.
+Built a simple Python Flask app — app.py. Flask is a lightweight web framework that lets Python handle web requests. The app returns a simple HTML page when hit on port 5000.
+Wrote the Dockerfile — the recipe for sealing the app into a container. FROM python:3.11-slim starts with Python already installed. WORKDIR sets the path inside the container. COPY brings the app in. RUN pip install flask installs the dependency. CMD runs the app when the container starts.
+Created the Terraform files for ECR — the AWS warehouse where container images get stored. One resource, clean plan, applied successfully. ECR repository URL came back as output — GitHub Actions will need that URL to push images to the right place.
+scan_on_push = true means every image gets automatically scanned for security vulnerabilities when pushed. Security gate before anything reaches production.
+Destroyed the ECR after the session
