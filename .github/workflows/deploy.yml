@@ -1,0 +1,51 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+      paths:
+        - 'projects/cicd-pipeline/**'
+
+
+ env:
+   AWS_REGION: eu-west-2
+   ECR_REPOSITORY: cicd-pipeline-app
+   EKS_CLUSTER: eks-web-service-cluster
+   
+ jobs:
+   build-and-deploy:
+     runs-on:ubuntu-latest
+     
+     permissions:
+      id-token: write 
+      contents: read 
+
+     steps: 
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credntials@v4
+        with: 
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION}}
+
+          - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG projects/cicd-pipeline
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
+
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl set image deployment/web-app web-app=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

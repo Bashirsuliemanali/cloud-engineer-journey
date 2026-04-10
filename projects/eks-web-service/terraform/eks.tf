@@ -26,9 +26,9 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.eks_node_role.arn
 
   subnet_ids = [
-  aws_subnet.public_1.id,
-  aws_subnet.public_2.id,
-]
+    aws_subnet.public_1.id,
+    aws_subnet.public_2.id,
+  ]
 
   scaling_config {
     desired_size = 2

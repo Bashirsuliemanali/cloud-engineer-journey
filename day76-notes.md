@@ -1,0 +1,4 @@
+Built the IAM infrastructure for the CI/CD pipeline today. Created an OIDC provider in AWS that trusts GitHub as an identity provider. This means GitHub Actions gets temporary AWS credentials automatically instead of using hardcoded access keys. Secure and clean.
+Created the GitHub Actions IAM role with a trust policy using Federated instead of Service, because GitHub is external to AWS not an internal service. Added a condition locking the role to only my specific repository so no other GitHub pipeline can assume it.
+Attached a policy giving GitHub Actions exactly what it needs, ECR permissions to push container images and EKS describe to connect kubectl. Least privilege throughout.
+4 resources applied clean. ECR repository and OIDC infrastructure all live in AWS.
