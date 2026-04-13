@@ -6,15 +6,15 @@ metadata:
 spec:
   replicas: 2
   selector:
-   matchLabels:
-    app: web-app  
-  template: 
+    matchLabels:
+      app: web-app
+  template:
     metadata:
       labels:
         app: web-app
-    spec: 
+    spec:
       containers:
         - name: web-app
-          image: nginx:latest
+          image: 759553606679.dkr.ecr.eu-west-2.amazonaws.com/cicd-pipeline-app:8c3cf107508f200fcd76abac359f14b7b2b0f4b3
           ports:
-            - containerPort: 80
+            - containerPort: 5000

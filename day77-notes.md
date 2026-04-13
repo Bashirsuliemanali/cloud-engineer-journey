@@ -1,0 +1,6 @@
+Tonight was the biggest session yet. Got the full CI/CD pipeline working end to end.
+The pipeline triggers automatically every time I push code to the projects/cicd-pipeline/** path on main. GitHub Actions builds a Docker image of the Flask app, pushes it to ECR using OIDC temporary credentials, connects kubectl to the EKS cluster and deploys the new image automatically. Zero manual steps after the push.
+Hit a few real world debugging scenarios along the way. The GitHub Actions role couldn't talk to EKS because the cluster was using CONFIG_MAP authentication mode. Had to update it to API_AND_CONFIG_MAP and then create an access entry granting the GitHub Actions role cluster admin permissions.
+The t3.micro nodes kept hitting pod capacity limits during rolling updates. Had to scale down to 1 replica, let the new pod come up, then scale back to 2. Learned that t3.micro has a maximum of 4 pods per node so in production you'd use larger instances.
+The deployment was pointing at nginx initially then at a latest tag that didn't exist in ECR. Fixed it by pointing directly at the commit SHA tag that the pipeline pushed. Flask logs confirmed the app was running on port 5000 and the browser showed the live app.
+The pipeline is complete. Push code, watch it deploy. That's CI/CD. Alhamdulillah.
