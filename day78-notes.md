@@ -1,0 +1,7 @@
+Started interview prep properly for the first time. This was more valuable than building another project.
+Practiced the opening "tell me about yourself" answer. First attempt was too personal and had no technical content. Second attempt was much stronger, led with the projects, mentioned the stack, then personality. Technical credibility first is the right order.
+Practiced explaining the Uber background honestly. The framing that worked, driving gave flexibility to study consistently on my own schedule, treated it like a second job, daily GitHub streak proves the discipline.
+Walked through Project 2 in interview conditions. The IAM roles are now correct — cluster role assumed by EKS, node role assumed by EC2. NAT Gateway gap explained honestly with production awareness.
+Answered the DynamoDB state locking question well — covered separate environments, GitHub Actions approval gate, DynamoDB locking, and why it matters.
+Honest gap identified — OIDC trust policy mechanism. Know what it does but couldn't explain the specific condition that locks it to the correct repository. That needs to be locked in properly.
+The interview prep revealed something important — understanding the concepts is one thing, explaining them under pressure is another. Both need work.
