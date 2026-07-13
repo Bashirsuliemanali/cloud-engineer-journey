@@ -1,33 +1,22 @@
-# Cloud Engineer Journey (AWS + Terraform)
+# Bashir Ali — Cloud Engineering Portfolio
 
-## Overview
-This repository documents my hands on journey learning cloud engineering with a focus on AWS and Terraform. 
-The goal is to build real infrastructure using Infrastructure as Code, follow safe workflows, and understand how cloud systems work in practice.
+Self-taught DevOps Engineer building real AWS infrastructure with Terraform, Kubernetes, and CI/CD. No bootcamp, no shortcuts — every project built, broken, debugged, and documented by me.
 
-## What I’ve Built
-- AWS EC2 infrastructure provisioned using Terraform
-- Security groups with restricted SSH and HTTP access
-- Server bootstrapping using user_data (nginx)
-- Remote Terraform state using S3 with DynamoDB state locking
-- Environment separation using workspaces and tfvars
-- Modular Terraform structure for reuse and clarity
-- Safe workflows using plan, apply, and destroy
+## Projects
 
-## Tools & Technologies
-- AWS (EC2, S3, IAM, Security Groups, DynamoDB)
-- Terraform
-- Linux (Amazon Linux)
-- Git & GitHub
+### [EKS Web Service](projects/eks-web-service)
+Provisioned a complete EKS environment from scratch — VPC, IAM, worker nodes, live app. Debugged a real NodeCreationFailure caused by a missing NAT Gateway.
 
-## Repository Structure
-- `/terraform` – Terraform infrastructure code
-- `dayX-notes.md` – Daily notes and reflections from each learning block
+### [CI/CD Pipeline](projects/cicd-pipeline)
+Fully automated deployment pipeline — GitHub Actions to ECR to EKS, zero manual steps, OIDC authentication with no static credentials.
 
-## Notes
-This repository focuses on hands on learning and documenting progress rather than finished production projects.
+### [EKS Monitoring Stack](projects/eks-monitoring)
+Prometheus and Grafana on EKS via Helm. Diagnosed and fixed an OOM-kill issue by resizing node types and updating Terraform resource limits.
 
-### Day 30 – Terraform Consolidation & Confidence
+## Stack
 
-Day 30 was a consolidation and reflection checkpoint. I focused on understanding why Terraform works the way it does, not just how to run commands.
+AWS (EKS, VPC, IAM, S3, DynamoDB, ECR) · Terraform · Kubernetes · Docker · GitHub Actions · Python
 
-By this point, I’m confident explaining state, remote backends, locking, drift, safe refactoring, and production guardrails. The main takeaway is that Terraform is about managing risk and change safely, not just provisioning infrastructure.
+## Daily progress
+
+Day-by-day build notes are in [`/daily-notes`](daily-notes) if you want to see the full process behind these projects, not just the final result.
